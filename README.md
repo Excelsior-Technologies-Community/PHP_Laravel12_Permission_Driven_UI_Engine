@@ -496,6 +496,7 @@ Posts Page
 http://127.0.0.1:8000/posts
 ```
 <img width="1336" height="664" alt="image" src="https://github.com/user-attachments/assets/dedea580-d884-44e2-acfd-9c69cb19f703" />
+
 ```php
 http://127.0.0.1:8000/posts/create
 ```
