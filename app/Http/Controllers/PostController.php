@@ -7,11 +7,20 @@ use Illuminate\Http\Request;
 
 class PostController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        return view('posts.index', [
-            'posts' => Post::latest()->get()
-        ]);
+        $search = $request->search;
+
+        $posts = Post::when($search, function ($query) use ($search) {
+
+            $query->where('title', 'LIKE', "%{$search}%")
+                ->orWhere('content', 'LIKE', "%{$search}%");
+
+        })
+            ->oldest()
+            ->paginate(4);
+
+        return view('posts.index', compact('posts'));
     }
 
     public function create()
@@ -28,6 +37,36 @@ class PostController extends Controller
 
         Post::create($request->all());
 
-        return redirect()->route('posts.index');
+        return redirect()
+            ->route('posts.index')
+            ->with('success', 'Post Created Successfully');
+    }
+
+    public function edit(Post $post)
+    {
+        return view('posts.edit', compact('post'));
+    }
+
+    public function update(Request $request, Post $post)
+    {
+        $request->validate([
+            'title' => 'required',
+            'content' => 'required',
+        ]);
+
+        $post->update($request->all());
+
+        return redirect()
+            ->route('posts.index')
+            ->with('success', 'Post Updated Successfully');
+    }
+
+    public function destroy(Post $post)
+    {
+        $post->delete();
+
+        return redirect()
+            ->route('posts.index')
+            ->with('success', 'Post Deleted Successfully');
     }
 }
