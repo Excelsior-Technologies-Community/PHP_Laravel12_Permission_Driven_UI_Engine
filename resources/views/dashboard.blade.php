@@ -25,12 +25,13 @@
     </x-slot>
 
     @php
+    $user = auth()->user();
 
-        $totalPosts = \App\Models\Post::count();
+    $totalPosts = \App\Models\Post::count();
 
-        $latestPosts = \App\Models\Post::oldest()
-                            ->paginate(3);
+    $myPosts = \App\Models\Post::where('user_id', $user->id)->count();
 
+    $latestPosts = \App\Models\Post::orderBy('id', 'asc')->paginate(3);
     @endphp
 
     <div class="min-h-screen bg-gradient-to-br from-black via-gray-900 to-gray-950 py-10">
@@ -109,11 +110,11 @@
 
                                 @if(auth()->user()->roles->count())
 
-                                    {{ auth()->user()->roles->first()->name }}
+                                {{ auth()->user()->roles->first()->name }}
 
                                 @else
 
-                                    No Role
+                                No Role
 
                                 @endif
 
@@ -128,6 +129,68 @@
                     </div>
 
                 </div>
+
+            </div>
+
+            <!-- Role Based Dashboard Widgets -->
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-10">
+
+                @if(auth()->user()->hasRole('Admin'))
+
+                <div class="bg-gradient-to-r from-blue-700 to-indigo-700 rounded-3xl p-6 shadow-2xl">
+
+                    <h2 class="text-2xl font-bold text-white mb-2">
+                        👑 Admin Analytics
+                    </h2>
+
+                    <p class="text-blue-100">
+                        Total Posts in System
+                    </p>
+
+                    <h3 class="text-4xl font-bold text-white mt-3">
+                        {{ $totalPosts }}
+                    </h3>
+
+                </div>
+
+                @endif
+
+                @if(auth()->user()->hasRole('Manager'))
+
+                <div class="bg-gradient-to-r from-green-700 to-emerald-700 rounded-3xl p-6 shadow-2xl">
+
+                    <h2 class="text-2xl font-bold text-white mb-2">
+                        📊 Manager Panel
+                    </h2>
+
+                    <p class="text-green-100">
+                        Posts Created By You
+                    </p>
+
+                    <h3 class="text-4xl font-bold text-white mt-3">
+                        {{ $myPosts }}
+                    </h3>
+
+                </div>
+
+                @endif
+
+                @if(auth()->user()->hasRole('User'))
+
+                <div class="bg-gradient-to-r from-purple-700 to-pink-700 rounded-3xl p-6 shadow-2xl">
+
+                    <h2 class="text-2xl font-bold text-white mb-2">
+                        👤 User Dashboard
+                    </h2>
+
+                    <p class="text-purple-100">
+                        You can create and manage your own posts.
+                    </p>
+
+                </div>
+
+                @endif
 
             </div>
 
@@ -153,8 +216,7 @@
 
                     <a
                         href="{{ route('posts.create') }}"
-                        class="bg-blue-600 hover:bg-blue-700 px-6 py-3 rounded-2xl text-white font-semibold shadow-lg transition"
-                    >
+                        class="bg-blue-600 hover:bg-blue-700 px-6 py-3 rounded-2xl text-white font-semibold shadow-lg transition">
                         ➕ Create Post
                     </a>
 
@@ -162,9 +224,14 @@
 
                     <a
                         href="{{ route('posts.index') }}"
-                        class="bg-gray-800 hover:bg-gray-700 px-6 py-3 rounded-2xl text-white font-semibold shadow-lg transition"
-                    >
+                        class="bg-gray-800 hover:bg-gray-700 px-6 py-3 rounded-2xl text-white font-semibold shadow-lg transition">
                         📋 View Posts
+                    </a>
+
+                    <a
+                        href="{{ route('my-posts') }}"
+                        class="bg-purple-600 hover:bg-purple-700 px-6 py-3 rounded-2xl text-white font-semibold shadow-lg transition">
+                        👤 My Posts
                     </a>
 
                 </div>
@@ -211,31 +278,31 @@
 
                             @forelse($latestPosts as $post)
 
-                                <tr class="border-b border-gray-800 hover:bg-gray-800 transition">
+                            <tr class="border-b border-gray-800 hover:bg-gray-800 transition">
 
-                                    <td class="px-6 py-4 text-gray-300">
-                                        #{{ $post->id }}
-                                    </td>
+                                <td class="px-6 py-4 text-gray-300">
+                                    #{{ $post->id }}
+                                </td>
 
-                                    <td class="px-6 py-4 text-white font-medium">
-                                        {{ $post->title }}
-                                    </td>
+                                <td class="px-6 py-4 text-white font-medium">
+                                    {{ $post->title }}
+                                </td>
 
-                                    <td class="px-6 py-4 text-gray-400">
-                                        {{ $post->created_at->format('d M Y') }}
-                                    </td>
+                                <td class="px-6 py-4 text-gray-400">
+                                    {{ $post->created_at->format('d M Y') }}
+                                </td>
 
-                                </tr>
+                            </tr>
 
                             @empty
 
-                                <tr>
+                            <tr>
 
-                                    <td colspan="3" class="text-center py-10 text-gray-500">
-                                        No Posts Available
-                                    </td>
+                                <td colspan="3" class="text-center py-10 text-gray-500">
+                                    No Posts Available
+                                </td>
 
-                                </tr>
+                            </tr>
 
                             @endforelse
 

@@ -34,14 +34,18 @@ Route::middleware(['auth'])->group(function () {
     Route::resource('posts', PostController::class);
 });
 
+Route::get('/my-posts', [PostController::class, 'myPosts'])
+    ->middleware('auth')
+    ->name('my-posts');
+
 /*
 |--------------------------------------------------------------------------
 | Admin Only
 |--------------------------------------------------------------------------
 */
-Route::middleware(['auth','role:Admin'])->group(function () {
-    Route::get('/users', [UserController::class,'index']);
-    Route::post('/users/{user}/role', [UserController::class,'assignRole']);
+Route::middleware(['auth', 'role:Admin'])->group(function () {
+    Route::get('/users', [UserController::class, 'index']);
+    Route::post('/users/{user}/role', [UserController::class, 'assignRole']);
 });
 
-require __DIR__.'/auth.php';
+require __DIR__ . '/auth.php';

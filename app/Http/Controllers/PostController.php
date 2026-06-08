@@ -11,13 +11,13 @@ class PostController extends Controller
     {
         $search = $request->search;
 
-        $posts = Post::when($search, function ($query) use ($search) {
+        $posts = Post::with('user')
+            ->when($search, function ($query) use ($search) {
 
-            $query->where('title', 'LIKE', "%{$search}%")
-                ->orWhere('content', 'LIKE', "%{$search}%");
-
-        })
-            ->oldest()
+                $query->where('title', 'LIKE', "%{$search}%")
+                    ->orWhere('content', 'LIKE', "%{$search}%");
+            })
+            ->orderBy('id', 'asc')
             ->paginate(4);
 
         return view('posts.index', compact('posts'));
@@ -35,7 +35,11 @@ class PostController extends Controller
             'content' => 'required',
         ]);
 
-        Post::create($request->all());
+        Post::create([
+            'title' => $request->title,
+            'content' => $request->content,
+            'user_id' => auth()->id(), 
+        ]);
 
         return redirect()
             ->route('posts.index')
@@ -54,13 +58,15 @@ class PostController extends Controller
             'content' => 'required',
         ]);
 
-        $post->update($request->all());
+        $post->update([
+            'title' => $request->title,
+            'content' => $request->content,
+        ]);
 
         return redirect()
             ->route('posts.index')
             ->with('success', 'Post Updated Successfully');
     }
-
     public function destroy(Post $post)
     {
         $post->delete();
@@ -68,5 +74,14 @@ class PostController extends Controller
         return redirect()
             ->route('posts.index')
             ->with('success', 'Post Deleted Successfully');
+    }
+
+    public function myPosts()
+    {
+        $posts = Post::where('user_id', auth()->id())
+            ->orderBy('id', 'asc')
+            ->paginate(4);
+
+        return view('posts.my-posts', compact('posts'));
     }
 }
