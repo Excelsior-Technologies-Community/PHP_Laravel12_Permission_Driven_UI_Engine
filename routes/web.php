@@ -3,6 +3,7 @@
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\PostController;
 use App\Http\Controllers\UserController;
+use App\Http\Controllers\PermissionController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -32,6 +33,8 @@ Route::middleware(['auth'])->group(function () {
 
     // 🔥 POSTS (THIS WAS MISSING)
     Route::resource('posts', PostController::class);
+    Route::post('posts/{post}/restore', [PostController::class, 'restore'])
+        ->name('posts.restore');
 });
 
 Route::get('/my-posts', [PostController::class, 'myPosts'])
@@ -44,8 +47,14 @@ Route::get('/my-posts', [PostController::class, 'myPosts'])
 |--------------------------------------------------------------------------
 */
 Route::middleware(['auth', 'role:Admin'])->group(function () {
-    Route::get('/users', [UserController::class, 'index']);
-    Route::post('/users/{user}/role', [UserController::class, 'assignRole']);
+    Route::get('/users', [UserController::class, 'index'])->name('users.index');
+    Route::post('/users/{user}/role', [UserController::class, 'assignRole'])->name('users.assignRole');
+
+    // 🔥 PERMISSION MANAGEMENT
+    Route::resource('permissions', PermissionController::class)
+        ->except(['show', 'edit', 'update', 'create']);
+    Route::post('/permissions/{permission}/assign-role', [PermissionController::class, 'assignToRole'])
+        ->name('permissions.assign-role');
 });
 
 require __DIR__ . '/auth.php';

@@ -179,6 +179,13 @@ return [
     'cache' => [
 
         /*
+         * Set to true to cache permissions/roles. The cache is flushed automatically
+         * whenever roles or permissions are updated.
+         */
+
+        'enabled' => true,
+
+        /*
          * By default all permissions are cached for 24 hours to speed up performance.
          * When permissions or roles are updated the cache is flushed automatically.
          */

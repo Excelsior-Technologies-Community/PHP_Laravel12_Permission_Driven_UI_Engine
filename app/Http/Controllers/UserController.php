@@ -10,15 +10,20 @@ class UserController extends Controller
 {
     public function index()
     {
-        return view('users.index',[
-            'users'=>User::all(),
-            'roles'=>Role::all()
+        return view('users.index', [
+            'users' => User::with('roles')->withCount('posts')->get(),
+            'roles' => Role::orderBy('name')->get(),
         ]);
     }
 
     public function assignRole(Request $request, User $user)
     {
+        $request->validate([
+            'role' => 'required|exists:roles,name',
+        ]);
+
         $user->syncRoles([$request->role]);
-        return back();
+
+        return back()->with('success', "Role updated for {$user->name}");
     }
 }
